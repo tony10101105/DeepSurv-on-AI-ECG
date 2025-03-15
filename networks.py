@@ -64,13 +64,14 @@ class DeepSurv(nn.Module):
         return self.model(X)
 
 class NegativeLogLikelihood(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, device):
         super(NegativeLogLikelihood, self).__init__()
         self.L2_reg = config['l2_reg']
         self.reg = Regularization(order=2, weight_decay=self.L2_reg)
+        self.device = device
 
     def forward(self, risk_pred, y, e, model):
-        mask = torch.ones(y.shape[0], y.shape[0])
+        mask = torch.ones(y.shape[0], y.shape[0]).to(self.device)
         mask[(y.T - y) > 0] = 0
         log_loss = torch.exp(risk_pred) * mask
         log_loss = torch.sum(log_loss, dim=0) / torch.sum(mask, dim=0)

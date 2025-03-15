@@ -13,7 +13,7 @@ import prettytable as pt
 
 from networks import DeepSurv
 from networks import NegativeLogLikelihood
-from datasets import SurvivalDataset
+from datasets import SurvivalDataset, SurvivalDatasetFMR
 from utils import read_config
 from utils import c_index
 from utils import adjust_learning_rate
@@ -29,12 +29,16 @@ def train(ini_file):
     config = read_config(ini_file)
     # builds network|criterion|optimizer based on configuration
     model = DeepSurv(config['network']).to(device)
-    criterion = NegativeLogLikelihood(config['network']).to(device)
+    criterion = NegativeLogLikelihood(config['network'], device).to(device)
     optimizer = eval('optim.{}'.format(config['train']['optimizer']))(
         model.parameters(), lr=config['train']['learning_rate'])
     # constructs data loaders based on configuration
-    train_dataset = SurvivalDataset(config['train']['h5_file'], is_train=True)
-    test_dataset = SurvivalDataset(config['train']['h5_file'], is_train=False)
+    # train_dataset = SurvivalDataset(config['train']['h5_file'], is_train=True)
+    # test_dataset = SurvivalDataset(config['train']['h5_file'], is_train=False)
+
+    train_dataset = SurvivalDatasetFMR(config['train']['h5_file'], is_train=True)
+    test_dataset = SurvivalDatasetFMR(config['train']['h5_file'], is_train=False)
+    
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=train_dataset.__len__())
     test_loader = torch.utils.data.DataLoader(
@@ -51,6 +55,9 @@ def train(ini_file):
         model.train()
         for X, y, e in train_loader:
             # makes predictions
+            X = X.to(device)
+            y = y.to(device)
+            e = e.to(device)
             risk_pred = model(X)
             train_loss = criterion(risk_pred, y, e, model)
             train_c = c_index(-risk_pred, y, e)
@@ -62,6 +69,9 @@ def train(ini_file):
         model.eval()
         for X, y, e in test_loader:
             # makes predictions
+            X = X.to(device)
+            y = y.to(device)
+            e = e.to(device)
             with torch.no_grad():
                 risk_pred = model(X)
                 valid_loss = criterion(risk_pred, y, e, model)
@@ -92,15 +102,19 @@ if __name__ == '__main__':
     logger = create_logger(logs_dir)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     configs_dir = 'configs'
+    # params = [
+    #     ('Simulated Linear', 'linear.ini'),
+    #     ('Simulated Nonlinear', 'gaussian.ini'),
+    #     ('WHAS', 'whas.ini'),
+    #     ('SUPPORT', 'support.ini'),
+    #     ('METABRIC', 'metabric.ini'),
+    #     ('Simulated Treatment', 'treatment.ini'),
+    #     ('Rotterdam & GBSG', 'gbsg.ini')
+    #     ]
     params = [
-        ('Simulated Linear', 'linear.ini'),
-        ('Simulated Nonlinear', 'gaussian.ini'),
-        ('WHAS', 'whas.ini'),
-        ('SUPPORT', 'support.ini'),
-        ('METABRIC', 'metabric.ini'),
-        ('Simulated Treatment', 'treatment.ini'),
-        ('Rotterdam & GBSG', 'gbsg.ini')]
-    patience = 50
+        ('FMR Cohort', 'fmr.ini')
+    ]
+    patience = 500
     # training
     headers = []
     values = []
