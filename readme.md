@@ -1,4 +1,4 @@
-# DeepSurv.pytorch
+# DeepSurv on AI-ECG
 
 This repository is an unofficial pytorch implementation of 
 [DeepSurv: Personalized Treatment Recommender System Using
