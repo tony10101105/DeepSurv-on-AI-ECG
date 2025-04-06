@@ -6,21 +6,19 @@ A Cox Proportional Hazards Deep Neural Network](https://link.springer.com/articl
 We reimplement the experiments in the paper, which is followed by [Github](https://github.com/jaredleekatzman/DeepSurv), and the detailed understanding is available on my [Blog](https://www.cnblogs.com/CZiFan/p/12674144.html).
 
 ## Requirements
-- Pytorch>=0.4.0
-- CPU or GPU
-- Other packages can be installed with the following instruction:
+- Install Pytorch>=0.4.0
+- Run:
 ```
 pip install requirements.txt
 ```
   
-## Quick start
-Running the code with the following command.
+## Usage
+Run:
 ```
 python main.py
 ```
-Note: You can modify some parameters in configs/*.ini to get your own specific models.
 
-## Results
+## Replication Results
 | | Simulated Linear | Simulated Nonlinear |   WHAS   | SUPPORT  | METABRIC | Simulated Treatment | Rotterdam & GBSG |
 |---|---|---|---|---|---|---|---|
 | Paper | 0.774019 | 0.648902 | 0.862620 | 0.618308 | 0.643374 | 0.582774 | 0.668402 |
