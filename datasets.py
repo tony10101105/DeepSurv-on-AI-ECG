@@ -84,7 +84,7 @@ class SurvivalDatasetFMR(Dataset):
         '''
         self.target_names = ['A4C LS', 'LASr 2', 'EF_volume', 'LVEDD', 'LVESD', 'LVEDDi', 'LVESDi imputed', 'Biplane_LVESV_or monoplane', 
                 'EDV_bp or mono', 'EDVi_bp or mono', 'LAVi', 'MVannulus_4C mm', 'Mitral annulus index, mm/m2', 
-                'MV_Ee_ratio_PWD', 'RV FAC'] # 15
+                'MV_Ee_ratio_PWD', 'RV FAC'] # 15 echo parameters
         
         self.non_echo_inputs = ['NYHA 1/2/3/4 _Dr 連', 'Age@echo', 'Female or Male', 'HEIGHT ♠♠♠♠', 'WEIGHT ♠♠♠♠', 'BSA', 'HR', 'SBP', 'DBP', 'CCI', 'Atrial fibrillation  Eric 2',	'Antiplatelet  Eric 2', 'Anticoagulant Eric 2', 'ACEi  Eric 2', 'ARB  Eric 2', 'ARNi  Eric', 'Beta-blocker Eric 2', 'CCB Eric 2', 'MRA Eric 2', 'Statins Eric 2', 'Diuretics Eric 2', 'Digoxin Eric 2', 'Nitrate Eric 2', 'HYdralazine Eric 2', 'Ivabradine Missing', 'Anti-arrhYthmic meds (class I) Eric 2', 'Anti-arrhYthmic meds (class III) Eric 2']
         
@@ -139,7 +139,6 @@ class SurvivalDatasetFMR(Dataset):
         df = df.dropna(subset=self.non_echo_inputs)
         df = df.dropna(subset=self.target_names)
         df = df.dropna(subset=[i+'_pred' for i in self.target_names])
-        
         
         X = df[self.target_names+self.non_echo_inputs].to_numpy().astype(np.float32) # use gt echo
         # X = df[[i+'_pred' for i in self.target_names]+self.non_echo_inputs].to_numpy().astype(np.float32) # use predicted echo

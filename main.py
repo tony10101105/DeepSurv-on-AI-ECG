@@ -10,6 +10,9 @@ import os
 import torch
 import torch.optim as optim
 import prettytable as pt
+import shap
+import matplotlib.pyplot as plt
+import pandas as pd
 
 from networks import DeepSurv
 from networks import NegativeLogLikelihood
@@ -88,6 +91,36 @@ def train(ini_file):
                     flag += 1
                     if flag >= patience:
                         return best_c_index
+                
+            if flag == 0:
+                ## test the shap function
+                inputs, _, _ = next(iter(test_loader))  # Assuming your loader returns (data, labels)
+
+                # Optional: If you want to work with a subset
+                X_batch = inputs[:100]  # shape: (batch_size, num_features)
+                X_batch = X_batch.to(device)
+
+                # DeepExplainer needs a small background sample from training data
+                background, _, _ = next(iter(train_loader))
+                background = background[:292]
+                background = background.to(device)
+
+                # Explain the model
+                explainer = shap.DeepExplainer(model, background)
+                shap_values = explainer.shap_values(X_batch).squeeze()
+
+
+                # Convert tensor to DataFrame for better plotting
+                feature_names = train_dataset.target_names+train_dataset.non_echo_inputs
+                # feature_names = [f"feature_{i}" for i in range(X_batch.shape[1])]
+                X_df = pd.DataFrame(X_batch.cpu().numpy(), columns=feature_names)
+
+                # Plot summary
+                shap.summary_plot(shap_values, X_df, show=False)
+                plt.savefig("shap_summary.png", dpi=500, bbox_inches='tight')
+                plt.close()
+                ##
+       
         # notes that, train loader and valid loader both have one batch!!!
         print('\rEpoch: {}\tLoss: {:.8f}({:.8f})\tc-index: {:.8f}({:.8f})\tlr: {:g}'.format(
             epoch, train_loss.item(), valid_loss.item(), train_c, valid_c, lr), end='', flush=False)
